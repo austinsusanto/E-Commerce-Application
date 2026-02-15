@@ -24,6 +24,7 @@ import com.app.exceptions.ResourceNotFoundException;
 import com.app.payloads.OrderDTO;
 import com.app.payloads.OrderItemDTO;
 import com.app.payloads.OrderResponse;
+import com.app.payloads.PaymentRequest;
 import com.app.repositories.CartItemRepo;
 import com.app.repositories.CartRepo;
 import com.app.repositories.OrderItemRepo;
@@ -71,7 +72,7 @@ public class OrderServiceImpl implements OrderService {
 	public StoreDiscountRepo storeDiscountRepo;
 
 	@Override
-	public OrderDTO placeOrder(String email, Long cartId, String paymentMethod) {
+	public OrderDTO placeOrder(String email, Long cartId, PaymentRequest paymentRequest) {
 
 		Cart cart = cartRepo.findCartByEmailAndCartId(email, cartId);
 
@@ -89,7 +90,19 @@ public class OrderServiceImpl implements OrderService {
 
 		Payment payment = new Payment();
 		payment.setOrder(order);
-		payment.setPaymentMethod(paymentMethod);
+		payment.setPaymentMethod(paymentRequest.getPaymentMethod());
+		
+		if ("Credit Card".equalsIgnoreCase(paymentRequest.getPaymentMethod())) {
+			if (paymentRequest.getCardNumber() == null || paymentRequest.getCardNumber().isBlank()) {
+				throw new APIException("Card number is required for credit card payment");
+			}
+			if (paymentRequest.getCvc() == null || paymentRequest.getCvc().isBlank()) {
+				throw new APIException("CVC is required for credit card payment");
+			}
+		}
+		
+		payment.setCardNumber(paymentRequest.getCardNumber());
+		payment.setCvc(paymentRequest.getCvc());
 
 		payment = paymentRepo.save(payment);
 

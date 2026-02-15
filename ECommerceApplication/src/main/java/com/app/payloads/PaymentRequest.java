@@ -1,5 +1,6 @@
 package com.app.payloads;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,10 +8,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaymentDTO {
-	private Long paymentId;
+public class PaymentRequest {
+	@NotBlank(message = "Payment method is required")
 	private String paymentMethod;
+	
 	private String cardNumber;
 	private String cvc;
-
 }
