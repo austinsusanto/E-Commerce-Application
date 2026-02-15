@@ -29,7 +29,10 @@ import com.app.repositories.CartRepo;
 import com.app.repositories.OrderItemRepo;
 import com.app.repositories.OrderRepo;
 import com.app.repositories.PaymentRepo;
+import com.app.repositories.StoreDiscountRepo;
 import com.app.repositories.UserRepo;
+import com.app.entites.StoreDiscount;
+import java.time.LocalDateTime;
 
 import jakarta.transaction.Transactional;
 
@@ -64,6 +67,9 @@ public class OrderServiceImpl implements OrderService {
 	@Autowired
 	public ModelMapper modelMapper;
 
+	@Autowired
+	public StoreDiscountRepo storeDiscountRepo;
+
 	@Override
 	public OrderDTO placeOrder(String email, Long cartId, String paymentMethod) {
 
@@ -89,6 +95,13 @@ public class OrderServiceImpl implements OrderService {
 
 		order.setPayment(payment);
 
+		List<StoreDiscount> activeDiscounts = storeDiscountRepo.findActiveDiscountsByTime(LocalDateTime.now());
+		StoreDiscount activeStoreDiscount = activeDiscounts.isEmpty() ? null : activeDiscounts.get(0);
+		
+		if (activeStoreDiscount != null) {
+			order.setStoreDiscount(activeStoreDiscount);
+		}
+
 		Order savedOrder = orderRepo.save(order);
 
 		List<CartItem> cartItems = cart.getCartItems();
@@ -98,18 +111,35 @@ public class OrderServiceImpl implements OrderService {
 		}
 
 		List<OrderItem> orderItems = new ArrayList<>();
+		double newTotalAmount = 0;
 
 		for (CartItem cartItem : cartItems) {
 			OrderItem orderItem = new OrderItem();
+			Product product = cartItem.getProduct();
 
-			orderItem.setProduct(cartItem.getProduct());
+			orderItem.setProduct(product);
 			orderItem.setQuantity(cartItem.getQuantity());
-			orderItem.setDiscount(cartItem.getDiscount());
-			orderItem.setOrderedProductPrice(cartItem.getProductPrice());
+			
+			if (activeStoreDiscount != null) {
+				double originalPrice = product.getPrice();
+				double discountPercent = activeStoreDiscount.getDiscountValue();
+				double discountAmount = originalPrice * (discountPercent / 100);
+				double finalPrice = originalPrice - discountAmount;
+				
+				orderItem.setDiscount(discountPercent);
+				orderItem.setOrderedProductPrice(finalPrice);
+			} else {
+				orderItem.setDiscount(cartItem.getDiscount());
+				orderItem.setOrderedProductPrice(cartItem.getProductPrice());
+			}
+			
 			orderItem.setOrder(savedOrder);
+			newTotalAmount += orderItem.getOrderedProductPrice() * orderItem.getQuantity();
 
 			orderItems.add(orderItem);
 		}
+		
+		savedOrder.setTotalAmount(newTotalAmount);
 
 		orderItems = orderItemRepo.saveAll(orderItems);
 

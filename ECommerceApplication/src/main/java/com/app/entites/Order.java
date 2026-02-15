@@ -43,6 +43,10 @@ public class Order {
 	@JoinColumn(name = "payment_id")
 	private Payment payment;
 	
+	@OneToOne
+	@JoinColumn(name = "store_discount_id")
+	private StoreDiscount storeDiscount;
+	
 	private Double totalAmount;
 	private String orderStatus;
 }
