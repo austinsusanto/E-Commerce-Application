@@ -3,8 +3,6 @@ package com.app.entites;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -25,9 +23,6 @@ public class StoreDiscount {
 	private Long discountId;
 	
 	private String discountName;
-	
-	@Enumerated(EnumType.STRING)
-	private DiscountType discountType;
 	
 	private Double discountValue;
 	
