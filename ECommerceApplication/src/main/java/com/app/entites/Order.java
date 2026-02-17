@@ -29,7 +29,7 @@ public class Order {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long orderId;
-	
+
 	@Email
 	@Column(nullable = false)
 	private String email;
@@ -38,11 +38,15 @@ public class Order {
 	private List<OrderItem> orderItems = new ArrayList<>();
 
 	private LocalDate orderDate;
-	
+
 	@OneToOne
 	@JoinColumn(name = "payment_id")
 	private Payment payment;
-	
+
+	@OneToOne
+	@JoinColumn(name = "discount_id")
+	private Discount discountCode;
+
 	private Double totalAmount;
 	private String orderStatus;
 }
