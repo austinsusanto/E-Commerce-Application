@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.app.entites.Cart;
 import com.app.entites.CartItem;
+import com.app.entites.Discount;
 import com.app.entites.Order;
 import com.app.entites.OrderItem;
 import com.app.entites.Payment;
@@ -30,6 +31,7 @@ import com.app.repositories.OrderItemRepo;
 import com.app.repositories.OrderRepo;
 import com.app.repositories.PaymentRepo;
 import com.app.repositories.UserRepo;
+import com.app.repositories.DiscountRepo;
 
 import jakarta.transaction.Transactional;
 
@@ -56,6 +58,9 @@ public class OrderServiceImpl implements OrderService {
 	public CartItemRepo cartItemRepo;
 
 	@Autowired
+	public DiscountRepo discountRepo;
+
+	@Autowired
 	public UserService userService;
 
 	@Autowired
@@ -65,7 +70,7 @@ public class OrderServiceImpl implements OrderService {
 	public ModelMapper modelMapper;
 
 	@Override
-	public OrderDTO placeOrder(String email, Long cartId, String paymentMethod) {
+	public OrderDTO placeOrder(String email, Long cartId, String paymentMethod, String discountCode) {
 
 		Cart cart = cartRepo.findCartByEmailAndCartId(email, cartId);
 
@@ -89,6 +94,16 @@ public class OrderServiceImpl implements OrderService {
 
 		order.setPayment(payment);
 
+		if (!discountCode.isBlank()) {
+			Discount discount = discountRepo.findByDiscountCode(discountCode);
+
+			if (discount == null) {
+				throw new ResourceNotFoundException("Discount", "discountCode", discountCode);
+			}
+			order.setDiscountCode(discount);
+
+		}
+
 		Order savedOrder = orderRepo.save(order);
 
 		List<CartItem> cartItems = cart.getCartItems();
@@ -104,8 +119,20 @@ public class OrderServiceImpl implements OrderService {
 
 			orderItem.setProduct(cartItem.getProduct());
 			orderItem.setQuantity(cartItem.getQuantity());
-			orderItem.setDiscount(cartItem.getDiscount());
-			orderItem.setOrderedProductPrice(cartItem.getProductPrice());
+			if (!discountCode.isBlank()) {
+				Product product = cartItem.getProduct();
+
+				double originalPrice = product.getPrice();
+				double discountPercent = order.getDiscountCode().getDiscountValue();
+				double discountAmount = originalPrice * (discountPercent / 100);
+				double finalPrice = originalPrice - discountAmount;
+
+				orderItem.setDiscount(discountPercent);
+				orderItem.setOrderedProductPrice(finalPrice);
+			} else {
+				orderItem.setDiscount(cartItem.getDiscount());
+				orderItem.setOrderedProductPrice(cartItem.getProductPrice());
+			}
 			orderItem.setOrder(savedOrder);
 
 			orderItems.add(orderItem);
@@ -124,7 +151,7 @@ public class OrderServiceImpl implements OrderService {
 		});
 
 		OrderDTO orderDTO = modelMapper.map(savedOrder, OrderDTO.class);
-		
+
 		orderItems.forEach(item -> orderDTO.getOrderItems().add(modelMapper.map(item, OrderItemDTO.class)));
 
 		return orderDTO;
@@ -170,20 +197,20 @@ public class OrderServiceImpl implements OrderService {
 
 		List<OrderDTO> orderDTOs = orders.stream().map(order -> modelMapper.map(order, OrderDTO.class))
 				.collect(Collectors.toList());
-		
+
 		if (orderDTOs.size() == 0) {
 			throw new APIException("No orders placed yet by the users");
 		}
 
 		OrderResponse orderResponse = new OrderResponse();
-		
+
 		orderResponse.setContent(orderDTOs);
 		orderResponse.setPageNumber(pageOrders.getNumber());
 		orderResponse.setPageSize(pageOrders.getSize());
 		orderResponse.setTotalElements(pageOrders.getTotalElements());
 		orderResponse.setTotalPages(pageOrders.getTotalPages());
 		orderResponse.setLastPage(pageOrders.isLast());
-		
+
 		return orderResponse;
 	}
 
