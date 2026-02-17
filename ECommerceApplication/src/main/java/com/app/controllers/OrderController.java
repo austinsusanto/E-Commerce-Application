@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.app.config.AppConstants;
+import com.app.entites.Bank;
 import com.app.payloads.OrderDTO;
 import com.app.payloads.OrderResponse;
 import com.app.services.OrderService;
@@ -31,8 +32,8 @@ public class OrderController {
 
 	@PostMapping("/public/users/{email}/carts/{cartId}/payments/{paymentMethod}/order")
 	public ResponseEntity<OrderDTO> orderProducts(@PathVariable String email, @PathVariable Long cartId,
-			@PathVariable String paymentMethod, @RequestBody String discountCode) {
-		OrderDTO order = orderService.placeOrder(email, cartId, paymentMethod, discountCode);
+			@PathVariable String paymentMethod, @RequestBody String discountCode, @RequestBody Bank bank) {
+		OrderDTO order = orderService.placeOrder(email, cartId, paymentMethod, discountCode, bank);
 
 		return new ResponseEntity<OrderDTO>(order, HttpStatus.CREATED);
 	}
