@@ -92,8 +92,19 @@ public class SeederService {
 
 		for (int i = 0; i < count; i++) {
 			User user = new User();
-			user.setFirstName(faker.name().firstName().replaceAll("[^a-zA-Z]", ""));
-			user.setLastName(faker.name().lastName().replaceAll("[^a-zA-Z]", ""));
+			
+			String firstName = faker.name().firstName().replaceAll("[^a-zA-Z]", "");
+			while (firstName.length() < 5) {
+				firstName += faker.name().firstName().replaceAll("[^a-zA-Z]", "");
+			}
+			user.setFirstName(firstName.substring(0, Math.min(firstName.length(), 20)));
+			
+			String lastName = faker.name().lastName().replaceAll("[^a-zA-Z]", "");
+			while (lastName.length() < 5) {
+				lastName += faker.name().lastName().replaceAll("[^a-zA-Z]", "");
+			}
+			user.setLastName(lastName.substring(0, Math.min(lastName.length(), 20)));
+			
 			user.setEmail(faker.internet().emailAddress());
 			user.setMobileNumber(faker.number().digits(10));
 			user.setPassword(encodedPassword);
