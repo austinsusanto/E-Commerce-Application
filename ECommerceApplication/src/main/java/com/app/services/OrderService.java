@@ -3,12 +3,15 @@ package com.app.services;
 import java.util.List;
 
 import com.app.payloads.OrderDTO;
+import com.app.payloads.OrderRequestCashOnDeliveryDTO;
 import com.app.payloads.OrderResponse;
 
 public interface OrderService {
-	
+
 	OrderDTO placeOrder(String email, Long cartId, String paymentMethod);
-	
+
+	OrderDTO placeOrderCOD(String email, Long cartId, OrderRequestCashOnDeliveryDTO orderRequest);
+
 	OrderDTO getOrder(String email, Long orderId);
 	
 	List<OrderDTO> getOrdersByUser(String email);
