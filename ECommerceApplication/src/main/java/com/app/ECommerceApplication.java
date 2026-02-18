@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 
 @SpringBootApplication
 @SecurityScheme(name = "E-Commerce Application", scheme = "bearer", type = SecuritySchemeType.HTTP, in = SecuritySchemeIn.HEADER)
+@org.springframework.core.annotation.Order(1)
 public class ECommerceApplication implements CommandLineRunner {
 
 	@Autowired
