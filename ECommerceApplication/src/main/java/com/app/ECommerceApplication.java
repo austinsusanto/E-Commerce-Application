@@ -9,8 +9,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
-import com.app.config.AppConstants;
-import com.app.entites.Role;
 import com.app.repositories.RoleRepo;
 import com.app.services.SeedService;
 
@@ -21,9 +19,6 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 @SpringBootApplication
 @SecurityScheme(name = "E-Commerce Application", scheme = "bearer", type = SecuritySchemeType.HTTP, in = SecuritySchemeIn.HEADER)
 public class ECommerceApplication implements CommandLineRunner {
-
-	@Autowired
-	private RoleRepo roleRepo;
 
 	@Autowired
 	private SeedService seedService;

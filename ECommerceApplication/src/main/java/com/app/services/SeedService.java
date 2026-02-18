@@ -77,8 +77,16 @@ public class SeedService {
 
         for (int i = 0; i < count; i++) {
             User user = new User();
-            user.setFirstName(faker.name().firstName());
-            user.setLastName(faker.name().lastName());
+            String firstname = faker.name().firstName();
+            if (firstname.length() < 5) {
+                firstname = "Brock";
+            }
+            user.setFirstName(firstname);
+            String lastName = faker.name().lastName();
+            if (lastName.length() < 5) {
+                lastName = "Lesnar";
+            }
+            user.setLastName(lastName);
             user.setEmail(faker.internet().emailAddress());
             user.setMobileNumber(faker.number().digits(10));
             user.setPassword(encodedPassword);
