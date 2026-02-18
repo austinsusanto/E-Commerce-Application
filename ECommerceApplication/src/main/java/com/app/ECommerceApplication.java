@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import com.app.config.AppConstants;
 import com.app.entites.Role;
 import com.app.repositories.RoleRepo;
+import com.app.services.SeederService;
 
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
@@ -23,6 +24,9 @@ public class ECommerceApplication implements CommandLineRunner {
 
 	@Autowired
 	private RoleRepo roleRepo;
+
+	@Autowired
+	private SeederService seederService;
 
 	public static void main(String[] args) {
 		SpringApplication.run(ECommerceApplication.class, args);
@@ -49,6 +53,11 @@ public class ECommerceApplication implements CommandLineRunner {
 			List<Role> savedRoles = roleRepo.saveAll(roles);
 
 			savedRoles.forEach(System.out::println);
+
+			System.out.println("\n=== Auto-seeding database ===");
+			String seedResult = seederService.seedAll();
+			System.out.println(seedResult);
+			System.out.println("=== Seeding completed ===\n");
 
 		} catch (Exception e) {
 			e.printStackTrace();

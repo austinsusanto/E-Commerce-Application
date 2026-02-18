@@ -9,12 +9,17 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.app.entites.Address;
+import com.app.entites.Cart;
 import com.app.entites.Category;
 import com.app.entites.Product;
 import com.app.entites.Role;
 import com.app.entites.StoreDiscount;
 import com.app.entites.User;
+import com.app.repositories.AddressRepo;
+import com.app.repositories.CartRepo;
 import com.app.repositories.CategoryRepo;
 import com.app.repositories.ProductRepo;
 import com.app.repositories.RoleRepo;
@@ -24,6 +29,7 @@ import com.app.repositories.UserRepo;
 import net.datafaker.Faker;
 
 @Service
+@Transactional
 public class SeederService {
 
 	@Autowired
@@ -40,6 +46,12 @@ public class SeederService {
 
 	@Autowired
 	private StoreDiscountRepo storeDiscountRepo;
+
+	@Autowired
+	private CartRepo cartRepo;
+
+	@Autowired
+	private AddressRepo addressRepo;
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -206,13 +218,55 @@ public class SeederService {
 		return "Seeded " + discounts.size() + " store discounts";
 	}
 
+	public String seedCarts() {
+		List<User> users = userRepo.findAll();
+		if (users.isEmpty()) {
+			return "Please seed users first";
+		}
+
+		List<Cart> carts = new ArrayList<>();
+		for (User user : users) {
+			Cart cart = new Cart();
+			cart.setUser(user);
+			cart.setTotalPrice(0.0);
+			carts.add(cart);
+		}
+
+		cartRepo.saveAll(carts);
+		return "Seeded " + carts.size() + " carts for all users";
+	}
+
+	public String seedAddresses() {
+		Faker faker = new Faker();
+		List<User> users = userRepo.findAll();
+		if (users.isEmpty()) {
+			return "Please seed users first";
+		}
+
+		for (User user : users) {
+			Address address = new Address();
+			address.setStreet(faker.address().streetAddress());
+			address.setBuildingName(faker.address().buildingNumber() + " Building");
+			address.setCity(faker.address().city());
+			address.setState(faker.address().state());
+			address.setCountry(faker.address().country());
+			address.setPincode(faker.numerify("######"));
+			addressRepo.save(address);
+			user.getAddresses().add(address);
+			userRepo.save(user);
+		}
+		return "Seeded addresses for " + users.size() + " users";
+	}
+
 	public String seedAll() {
 		StringBuilder result = new StringBuilder();
 		result.append(seedRoles()).append("\n");
 		result.append(seedCategories()).append("\n");
 		result.append(seedAdmin()).append("\n");
 		result.append(seedUsers(5)).append("\n");
-		result.append(seedProducts(20)).append("\n");
+		result.append(seedAddresses()).append("\n");
+		result.append(seedCarts()).append("\n");
+		result.append(seedProducts(50)).append("\n");
 		result.append(seedStoreDiscounts()).append("\n");
 		return result.toString();
 	}

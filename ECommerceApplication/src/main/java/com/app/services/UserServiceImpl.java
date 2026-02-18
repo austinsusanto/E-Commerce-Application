@@ -120,14 +120,15 @@ public class UserServiceImpl implements UserService {
 				dto.setAddress(modelMapper.map(user.getAddresses().stream().findFirst().get(), AddressDTO.class));
 			}
 
-			CartDTO cart = modelMapper.map(user.getCart(), CartDTO.class);
+			if (user.getCart() != null) {
+				CartDTO cart = modelMapper.map(user.getCart(), CartDTO.class);
 
-			List<ProductDTO> products = user.getCart().getCartItems().stream()
-					.map(item -> modelMapper.map(item.getProduct(), ProductDTO.class)).collect(Collectors.toList());
+				List<ProductDTO> products = user.getCart().getCartItems().stream()
+						.map(item -> modelMapper.map(item.getProduct(), ProductDTO.class)).collect(Collectors.toList());
 
-			dto.setCart(cart);
-
-			dto.getCart().setProducts(products);
+				dto.setCart(cart);
+				dto.getCart().setProducts(products);
+			}
 
 			return dto;
 
@@ -152,16 +153,19 @@ public class UserServiceImpl implements UserService {
 
 		UserDTO userDTO = modelMapper.map(user, UserDTO.class);
 
-		userDTO.setAddress(modelMapper.map(user.getAddresses().stream().findFirst().get(), AddressDTO.class));
+		if (user.getAddresses() != null && !user.getAddresses().isEmpty()) {
+			userDTO.setAddress(modelMapper.map(user.getAddresses().stream().findFirst().get(), AddressDTO.class));
+		}
 
-		CartDTO cart = modelMapper.map(user.getCart(), CartDTO.class);
+		if (user.getCart() != null) {
+			CartDTO cart = modelMapper.map(user.getCart(), CartDTO.class);
 
-		List<ProductDTO> products = user.getCart().getCartItems().stream()
-				.map(item -> modelMapper.map(item.getProduct(), ProductDTO.class)).collect(Collectors.toList());
+			List<ProductDTO> products = user.getCart().getCartItems().stream()
+					.map(item -> modelMapper.map(item.getProduct(), ProductDTO.class)).collect(Collectors.toList());
 
-		userDTO.setCart(cart);
-
-		userDTO.getCart().setProducts(products);
+			userDTO.setCart(cart);
+			userDTO.getCart().setProducts(products);
+		}
 
 		return userDTO;
 	}
