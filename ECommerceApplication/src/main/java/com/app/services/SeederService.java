@@ -18,6 +18,7 @@ import com.app.entites.Product;
 import com.app.entites.Role;
 import com.app.entites.StoreDiscount;
 import com.app.entites.User;
+import com.app.entites.Wishlist;
 import com.app.repositories.AddressRepo;
 import com.app.repositories.CartRepo;
 import com.app.repositories.CategoryRepo;
@@ -25,6 +26,7 @@ import com.app.repositories.ProductRepo;
 import com.app.repositories.RoleRepo;
 import com.app.repositories.StoreDiscountRepo;
 import com.app.repositories.UserRepo;
+import com.app.repositories.WishlistRepo;
 
 import net.datafaker.Faker;
 
@@ -52,6 +54,9 @@ public class SeederService {
 
 	@Autowired
 	private AddressRepo addressRepo;
+
+	@Autowired
+	private WishlistRepo wishlistRepo;
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -258,6 +263,46 @@ public class SeederService {
 		return "Seeded addresses for " + users.size() + " users";
 	}
 
+	public String seedWishlists() {
+		List<User> users = userRepo.findAll();
+		List<Product> products = productRepo.findAll();
+		
+		if (users.isEmpty()) {
+			return "Please seed users first";
+		}
+		
+		if (products.isEmpty()) {
+			return "Please seed products first";
+		}
+
+		List<Wishlist> wishlists = new ArrayList<>();
+		
+		// Each user gets 2-8 random wishlist items
+		for (User user : users) {
+			int wishlistSize = faker.number().numberBetween(2, 8);
+			Set<Long> productIds = new HashSet<>(); // Avoid duplicates
+			
+			for (int i = 0; i < wishlistSize; i++) {
+				Product randomProduct = products.get(faker.number().numberBetween(0, products.size()));
+				
+				// Avoid duplicate products for same user
+				if (!productIds.contains(randomProduct.getProductId())) {
+					productIds.add(randomProduct.getProductId());
+					
+					Wishlist wishlist = new Wishlist();
+					wishlist.setUser(user);
+					wishlist.setProduct(randomProduct);
+					// addedAt will be set automatically by @PrePersist
+					
+					wishlists.add(wishlist);
+				}
+			}
+		}
+
+		wishlistRepo.saveAll(wishlists);
+		return "Seeded " + wishlists.size() + " wishlist items for " + users.size() + " users";
+	}
+
 	public String seedAll() {
 		StringBuilder result = new StringBuilder();
 		result.append(seedRoles()).append("\n");
@@ -268,6 +313,7 @@ public class SeederService {
 		result.append(seedCarts()).append("\n");
 		result.append(seedProducts(50)).append("\n");
 		result.append(seedStoreDiscounts()).append("\n");
+		result.append(seedWishlists()).append("\n");
 		return result.toString();
 	}
 }
