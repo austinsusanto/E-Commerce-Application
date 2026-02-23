@@ -64,9 +64,6 @@ public class OrderServiceImpl implements OrderService {
 	public CartItemRepo cartItemRepo;
 
 	@Autowired
-	public DiscountRepo discountRepo;
-
-	@Autowired
 	public UserService userService;
 
 	@Autowired
@@ -122,11 +119,13 @@ public class OrderServiceImpl implements OrderService {
 			}
 
 			deliveryAddress = addressRepo.findById(paymentRequest.getAddressId())
-					.orElseThrow(() -> new ResourceNotFoundException("Address", "addressId", paymentRequest.getAddressId()));
+					.orElseThrow(
+							() -> new ResourceNotFoundException("Address", "addressId", paymentRequest.getAddressId()));
 
 			if (paymentRequest.getMembershipCode() != null && !paymentRequest.getMembershipCode().isBlank()) {
 				memberDiscount = memberDiscountRepo.findByMembershipCode(paymentRequest.getMembershipCode())
-						.orElseThrow(() -> new APIException("Invalid membership code: " + paymentRequest.getMembershipCode()));
+						.orElseThrow(() -> new APIException(
+								"Invalid membership code: " + paymentRequest.getMembershipCode()));
 
 				if (!memberDiscount.isActive()) {
 					throw new APIException("Membership code is no longer active");
@@ -162,7 +161,7 @@ public class OrderServiceImpl implements OrderService {
 		// Store discount logic
 		List<StoreDiscount> activeDiscounts = storeDiscountRepo.findActiveDiscountsByTime(LocalDateTime.now());
 		StoreDiscount activeStoreDiscount = activeDiscounts.isEmpty() ? null : activeDiscounts.get(0);
-		
+
 		if (activeStoreDiscount != null) {
 			order.setStoreDiscount(activeStoreDiscount);
 		}
