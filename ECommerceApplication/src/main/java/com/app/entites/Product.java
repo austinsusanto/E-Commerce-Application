@@ -13,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -40,7 +41,8 @@ public class Product {
 	@Size(min = 6, message = "Product description must contain atleast 6 characters")
 	private String description;
 	
-	private Integer quantity;
+	@Min(value = 0, message = "Stock must be zero or greater")
+	private Integer stock;
 	private double price;
 	private double discount;
 	private double specialPrice;

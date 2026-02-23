@@ -192,11 +192,11 @@ public class DataSeeder implements CommandLineRunner {
 		memberDiscountRepo.saveAll(List.of(gold, silver, bronze, expired));
 	}
 
-	private Product createProduct(String name, String description, int quantity, double price, double discount, Category category) {
+	private Product createProduct(String name, String description, int stock, double price, double discount, Category category) {
 		Product product = new Product();
 		product.setProductName(name);
 		product.setDescription(description);
-		product.setQuantity(quantity);
+		product.setStock(stock);
 		product.setPrice(price);
 		product.setDiscount(discount);
 		product.setSpecialPrice(price - (price * discount / 100));

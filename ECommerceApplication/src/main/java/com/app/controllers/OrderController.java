@@ -37,7 +37,7 @@ public class OrderController {
 		return new ResponseEntity<OrderDTO>(order, HttpStatus.CREATED);
 	}
 
-	@PostMapping("/public/users/{email}/carts/{cartId}/payments/cod/order")
+	@PostMapping("/public/users/{email}/carts/{cartId}/payments/cash-on-delivery/order")
 	public ResponseEntity<OrderDTO> orderProductsCOD(@PathVariable String email, @PathVariable Long cartId,
 			@RequestBody OrderRequestCashOnDeliveryDTO orderRequest) {
 		OrderDTO order = orderService.placeOrderCOD(email, cartId, orderRequest);

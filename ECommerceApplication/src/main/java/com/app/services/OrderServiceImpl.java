@@ -84,11 +84,25 @@ public class OrderServiceImpl implements OrderService {
 			throw new ResourceNotFoundException("Cart", "cartId", cartId);
 		}
 
+		List<CartItem> cartItems = cart.getCartItems();
+
+		if (cartItems.size() == 0) {
+			throw new APIException("Cart is empty");
+		}
+
+		for (CartItem cartItem : cartItems) {
+			Product product = cartItem.getProduct();
+			int quantity = cartItem.getQuantity();
+			if (product.getStock() == null || product.getStock() < quantity) {
+				throw new APIException("Insufficient stock for " + product.getProductName()
+						+ ". Available stock: " + (product.getStock() == null ? 0 : product.getStock()) + ".");
+			}
+		}
+
 		Order order = new Order();
 
 		order.setEmail(email);
 		order.setOrderDate(LocalDate.now());
-
 		order.setTotalAmount(cart.getTotalPrice());
 		order.setOrderStatus("Order Accepted !");
 
@@ -101,12 +115,6 @@ public class OrderServiceImpl implements OrderService {
 		order.setPayment(payment);
 
 		Order savedOrder = orderRepo.save(order);
-
-		List<CartItem> cartItems = cart.getCartItems();
-
-		if (cartItems.size() == 0) {
-			throw new APIException("Cart is empty");
-		}
 
 		List<OrderItem> orderItems = new ArrayList<>();
 
@@ -131,7 +139,7 @@ public class OrderServiceImpl implements OrderService {
 
 			cartService.deleteProductFromCart(cartId, item.getProduct().getProductId());
 
-			product.setQuantity(product.getQuantity() - quantity);
+			product.setStock(product.getStock() - quantity);
 		});
 
 		OrderDTO orderDTO = modelMapper.map(savedOrder, OrderDTO.class);
@@ -154,6 +162,15 @@ public class OrderServiceImpl implements OrderService {
 
 		if (cartItems.size() == 0) {
 			throw new APIException("Cart is empty");
+		}
+
+		for (CartItem cartItem : cartItems) {
+			Product product = cartItem.getProduct();
+			int quantity = cartItem.getQuantity();
+			if (product.getStock() == null || product.getStock() < quantity) {
+				throw new APIException("Insufficient stock for " + product.getProductName()
+						+ ". Available stock: " + (product.getStock() == null ? 0 : product.getStock()) + ".");
+			}
 		}
 
 		if (orderRequest.getAddressId() == null) {
@@ -185,7 +202,7 @@ public class OrderServiceImpl implements OrderService {
 
 		Payment payment = new Payment();
 		payment.setOrder(order);
-		payment.setPaymentMethod("COD");
+		payment.setPaymentMethod("Cash On Delivery");
 
 		payment = paymentRepo.save(payment);
 		order.setPayment(payment);
@@ -231,7 +248,7 @@ public class OrderServiceImpl implements OrderService {
 			int quantity = item.getQuantity();
 			Product product = item.getProduct();
 			cartService.deleteProductFromCart(finalCartId, item.getProduct().getProductId());
-			product.setQuantity(product.getQuantity() - quantity);
+			product.setStock(product.getStock() - quantity);
 		});
 
 		OrderDTO orderDTO = modelMapper.map(savedOrder, OrderDTO.class);
