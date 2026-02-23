@@ -35,4 +35,7 @@ public class Payment {
 	
 	private String cvc;
 
+	@NotBlank
+	private Bank bank;
+
 }

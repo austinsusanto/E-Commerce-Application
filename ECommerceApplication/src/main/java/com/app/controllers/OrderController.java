@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.app.config.AppConstants;
+import com.app.entites.Bank;
 import com.app.payloads.OrderDTO;
 import com.app.payloads.OrderResponse;
 import com.app.payloads.PaymentRequest;
@@ -63,7 +64,8 @@ public class OrderController {
 	}
 
 	@PutMapping("admin/users/{email}/orders/{orderId}/orderStatus/{orderStatus}")
-	public ResponseEntity<OrderDTO> updateOrderByUser(@PathVariable String email, @PathVariable Long orderId, @PathVariable String orderStatus) {
+	public ResponseEntity<OrderDTO> updateOrderByUser(@PathVariable String email, @PathVariable Long orderId,
+			@PathVariable String orderStatus) {
 		OrderDTO order = orderService.updateOrder(email, orderId, orderStatus);
 
 		return new ResponseEntity<OrderDTO>(order, HttpStatus.OK);
