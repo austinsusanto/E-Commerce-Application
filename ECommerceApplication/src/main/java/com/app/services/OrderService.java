@@ -9,7 +9,7 @@ import com.app.payloads.PaymentRequest;
 public interface OrderService {
 	
 	OrderDTO placeOrder(String email, Long cartId, PaymentRequest paymentRequest);
-	
+
 	OrderDTO getOrder(String email, Long orderId);
 	
 	List<OrderDTO> getOrdersByUser(String email);

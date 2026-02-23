@@ -24,6 +24,7 @@ import com.app.repositories.CartRepo;
 import com.app.repositories.CategoryRepo;
 import com.app.repositories.ProductRepo;
 import com.app.repositories.RoleRepo;
+import com.app.repositories.MemberDiscountRepo;
 import com.app.repositories.StoreDiscountRepo;
 import com.app.repositories.UserRepo;
 import com.app.repositories.WishlistRepo;
@@ -57,6 +58,9 @@ public class SeederService {
 
 	@Autowired
 	private WishlistRepo wishlistRepo;
+
+	@Autowired
+	private MemberDiscountRepo memberDiscountRepo;
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -175,7 +179,7 @@ public class SeederService {
 			product.setProductName(faker.commerce().productName());
 			product.setDescription(faker.lorem().sentence(10));
 			product.setImage("https://picsum.photos/seed/" + faker.number().numberBetween(1, 1000) + "/400/400");
-			product.setQuantity(faker.number().numberBetween(10, 100));
+			product.setStock(faker.number().numberBetween(10, 100));
 			product.setPrice(Double.parseDouble(faker.commerce().price(10, 500)));
 			product.setDiscount(faker.number().numberBetween(0, 30));
 			product.setSpecialPrice(product.getPrice() - (product.getPrice() * product.getDiscount() / 100));
@@ -303,17 +307,59 @@ public class SeederService {
 		return "Seeded " + wishlists.size() + " wishlist items for " + users.size() + " users";
 	}
 
+	public String seedMemberDiscounts() {
+		if (memberDiscountRepo.count() > 0) {
+			return "Member discounts already seeded";
+		}
+
+		List<com.app.entites.MemberDiscount> discounts = new ArrayList<>();
+
+		com.app.entites.MemberDiscount gold = new com.app.entites.MemberDiscount();
+		gold.setMembershipCode("GOLD2025");
+		gold.setMemberName("Gold Member");
+		gold.setDiscountPercentage(15);
+		gold.setActive(true);
+		discounts.add(gold);
+
+		com.app.entites.MemberDiscount silver = new com.app.entites.MemberDiscount();
+		silver.setMembershipCode("SILVER2025");
+		silver.setMemberName("Silver Member");
+		silver.setDiscountPercentage(10);
+		silver.setActive(true);
+		discounts.add(silver);
+
+		com.app.entites.MemberDiscount bronze = new com.app.entites.MemberDiscount();
+		bronze.setMembershipCode("BRONZE2025");
+		bronze.setMemberName("Bronze Member");
+		bronze.setDiscountPercentage(5);
+		bronze.setActive(true);
+		discounts.add(bronze);
+
+		com.app.entites.MemberDiscount expired = new com.app.entites.MemberDiscount();
+		expired.setMembershipCode("EXPIRED01");
+		expired.setMemberName("Expired Member");
+		expired.setDiscountPercentage(20);
+		expired.setActive(false);
+		discounts.add(expired);
+
+		memberDiscountRepo.saveAll(discounts);
+		return "Seeded " + discounts.size() + " member discounts";
+	}
+
 	public String seedAll() {
 		StringBuilder result = new StringBuilder();
+		
 		result.append(seedRoles()).append("\n");
 		result.append(seedCategories()).append("\n");
 		result.append(seedAdmin()).append("\n");
-		result.append(seedUsers(5)).append("\n");
-		result.append(seedAddresses()).append("\n");
-		result.append(seedCarts()).append("\n");
-		result.append(seedProducts(50)).append("\n");
+		result.append(seedUsers(10)).append("\n");
+		result.append(seedProducts(20)).append("\n");
 		result.append(seedStoreDiscounts()).append("\n");
+		result.append(seedMemberDiscounts()).append("\n");
+		result.append(seedCarts()).append("\n");
+		result.append(seedAddresses()).append("\n");
 		result.append(seedWishlists()).append("\n");
+		
 		return result.toString();
 	}
 }

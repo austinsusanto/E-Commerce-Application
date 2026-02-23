@@ -20,5 +20,8 @@ public class OrderDTO {
 	private PaymentDTO payment;
 	private Double totalAmount;
 	private String orderStatus;
+	private AddressDTO deliveryAddress;
+	private String membershipCode;
+	private Double memberDiscount;
 
 }

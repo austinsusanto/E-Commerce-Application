@@ -76,6 +76,9 @@ public class ProductServiceImpl implements ProductService {
 			product.setImage("default.png");
 
 			product.setCategory(category);
+			if (product.getStock() == null) {
+				product.setStock(0);
+			}
 
 			double specialPrice = product.getPrice() - ((product.getDiscount() * 0.01) * product.getPrice());
 			product.setSpecialPrice(specialPrice);
@@ -192,6 +195,9 @@ public class ProductServiceImpl implements ProductService {
 		product.setImage(productFromDB.getImage());
 		product.setProductId(productId);
 		product.setCategory(productFromDB.getCategory());
+		if (product.getStock() == null) {
+			product.setStock(productFromDB.getStock());
+		}
 
 		double specialPrice = product.getPrice() - ((product.getDiscount() * 0.01) * product.getPrice());
 		product.setSpecialPrice(specialPrice);
@@ -232,6 +238,22 @@ public class ProductServiceImpl implements ProductService {
 		
 		Product updatedProduct = productRepo.save(productFromDB);
 		
+		return modelMapper.map(updatedProduct, ProductDTO.class);
+	}
+
+	@Override
+	public ProductDTO updateProductStock(Long productId, Integer stock) {
+		Product productFromDB = productRepo.findById(productId)
+				.orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
+
+		if (stock == null || stock < 0) {
+			throw new APIException("Stock must be zero or greater");
+		}
+
+		productFromDB.setStock(stock);
+
+		Product updatedProduct = productRepo.save(productFromDB);
+
 		return modelMapper.map(updatedProduct, ProductDTO.class);
 	}
 	

@@ -14,4 +14,8 @@ public class PaymentRequest {
 	
 	private String cardNumber;
 	private String cvc;
+	
+	// COD fields
+	private Long addressId;
+	private String membershipCode;
 }

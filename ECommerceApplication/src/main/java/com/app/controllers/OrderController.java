@@ -26,14 +26,13 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 @RequestMapping("/api")
 @SecurityRequirement(name = "E-Commerce Application")
 public class OrderController {
-	
+
 	@Autowired
 	public OrderService orderService;
 	
 	@PostMapping("/public/users/{email}/carts/{cartId}/order")
 	public ResponseEntity<OrderDTO> orderProducts(@PathVariable String email, @PathVariable Long cartId, @RequestBody PaymentRequest paymentRequest) {
 		OrderDTO order = orderService.placeOrder(email, cartId, paymentRequest);
-		
 		return new ResponseEntity<OrderDTO>(order, HttpStatus.CREATED);
 	}
 
@@ -43,30 +42,30 @@ public class OrderController {
 			@RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
 			@RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_ORDERS_BY, required = false) String sortBy,
 			@RequestParam(name = "sortOrder", defaultValue = AppConstants.SORT_DIR, required = false) String sortOrder) {
-		
+
 		OrderResponse orderResponse = orderService.getAllOrders(pageNumber, pageSize, sortBy, sortOrder);
 
 		return new ResponseEntity<OrderResponse>(orderResponse, HttpStatus.FOUND);
 	}
-	
+
 	@GetMapping("public/users/{email}/orders")
 	public ResponseEntity<List<OrderDTO>> getOrdersByUser(@PathVariable String email) {
 		List<OrderDTO> orders = orderService.getOrdersByUser(email);
-		
+
 		return new ResponseEntity<List<OrderDTO>>(orders, HttpStatus.FOUND);
 	}
-	
+
 	@GetMapping("public/users/{email}/orders/{orderId}")
 	public ResponseEntity<OrderDTO> getOrderByUser(@PathVariable String email, @PathVariable Long orderId) {
 		OrderDTO order = orderService.getOrder(email, orderId);
-		
+
 		return new ResponseEntity<OrderDTO>(order, HttpStatus.FOUND);
 	}
-	
+
 	@PutMapping("admin/users/{email}/orders/{orderId}/orderStatus/{orderStatus}")
 	public ResponseEntity<OrderDTO> updateOrderByUser(@PathVariable String email, @PathVariable Long orderId, @PathVariable String orderStatus) {
 		OrderDTO order = orderService.updateOrder(email, orderId, orderStatus);
-		
+
 		return new ResponseEntity<OrderDTO>(order, HttpStatus.OK);
 	}
 
