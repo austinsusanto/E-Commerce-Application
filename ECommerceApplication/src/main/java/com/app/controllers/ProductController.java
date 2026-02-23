@@ -94,6 +94,13 @@ public class ProductController {
 		return new ResponseEntity<ProductDTO>(updatedProduct, HttpStatus.OK);
 	}
 
+	@PutMapping("/admin/products/{productId}/stock/{stock}")
+	public ResponseEntity<ProductDTO> updateProductStock(@PathVariable Long productId, @PathVariable Integer stock) {
+		ProductDTO updatedProduct = productService.updateProductStock(productId, stock);
+
+		return new ResponseEntity<ProductDTO>(updatedProduct, HttpStatus.OK);
+	}
+
 	@DeleteMapping("/admin/products/{productId}")
 	public ResponseEntity<String> deleteProductByCategory(@PathVariable Long productId) {
 		String status = productService.deleteProduct(productId);

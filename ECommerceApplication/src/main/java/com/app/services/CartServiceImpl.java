@@ -51,13 +51,13 @@ public class CartServiceImpl implements CartService {
 			throw new APIException("Product " + product.getProductName() + " already exists in the cart");
 		}
 
-		if (product.getQuantity() == 0) {
+		if (product.getStock() == null || product.getStock() == 0) {
 			throw new APIException(product.getProductName() + " is not available");
 		}
 
-		if (product.getQuantity() < quantity) {
+		if (product.getStock() == null || product.getStock() < quantity) {
 			throw new APIException("Please, make an order of the " + product.getProductName()
-					+ " less than or equal to the quantity " + product.getQuantity() + ".");
+					+ " less than or equal to the stock " + product.getStock() + ".");
 		}
 
 		CartItem newCartItem = new CartItem();
@@ -69,8 +69,6 @@ public class CartServiceImpl implements CartService {
 		newCartItem.setProductPrice(product.getSpecialPrice());
 
 		cartItemRepo.save(newCartItem);
-
-		product.setQuantity(product.getQuantity() - quantity);
 
 		cart.setTotalPrice(cart.getTotalPrice() + (product.getSpecialPrice() * quantity));
 
@@ -119,7 +117,11 @@ public class CartServiceImpl implements CartService {
 		CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
 		
 		List<ProductDTO> products = cart.getCartItems().stream()
-				.map(p -> modelMapper.map(p.getProduct(), ProductDTO.class)).collect(Collectors.toList());
+				.map(p -> {
+					ProductDTO dto = modelMapper.map(p.getProduct(), ProductDTO.class);
+					dto.setStock(p.getProduct().getStock());
+					return dto;
+				}).collect(Collectors.toList());
 
 		cartDTO.setProducts(products);
 
@@ -157,13 +159,13 @@ public class CartServiceImpl implements CartService {
 		Product product = productRepo.findById(productId)
 				.orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
 
-		if (product.getQuantity() == 0) {
+		if (product.getStock() == null || product.getStock() == 0) {
 			throw new APIException(product.getProductName() + " is not available");
 		}
 
-		if (product.getQuantity() < quantity) {
+		if (product.getStock() == null || product.getStock() < quantity) {
 			throw new APIException("Please, make an order of the " + product.getProductName()
-					+ " less than or equal to the quantity " + product.getQuantity() + ".");
+					+ " less than or equal to the stock " + product.getStock() + ".");
 		}
 
 		CartItem cartItem = cartItemRepo.findCartItemByProductIdAndCartId(cartId, productId);
@@ -173,8 +175,6 @@ public class CartServiceImpl implements CartService {
 		}
 
 		double cartPrice = cart.getTotalPrice() - (cartItem.getProductPrice() * cartItem.getQuantity());
-
-		product.setQuantity(product.getQuantity() + cartItem.getQuantity() - quantity);
 
 		cartItem.setProductPrice(product.getSpecialPrice());
 		cartItem.setQuantity(quantity);
@@ -207,9 +207,6 @@ public class CartServiceImpl implements CartService {
 		}
 
 		cart.setTotalPrice(cart.getTotalPrice() - (cartItem.getProductPrice() * cartItem.getQuantity()));
-
-		Product product = cartItem.getProduct();
-		product.setQuantity(product.getQuantity() + cartItem.getQuantity());
 
 		cartItemRepo.deleteCartItemByProductIdAndCartId(cartId, productId);
 

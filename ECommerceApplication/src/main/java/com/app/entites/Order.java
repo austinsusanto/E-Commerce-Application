@@ -11,6 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -42,11 +43,18 @@ public class Order {
 	@OneToOne
 	@JoinColumn(name = "payment_id")
 	private Payment payment;
-
+	
 	@OneToOne
-	@JoinColumn(name = "discount_id")
-	private Discount discountCode;
-
+	@JoinColumn(name = "store_discount_id")
+	private StoreDiscount storeDiscount;
+	
 	private Double totalAmount;
 	private String orderStatus;
+
+	@ManyToOne
+	@JoinColumn(name = "delivery_address_id")
+	private Address deliveryAddress;
+
+	private String membershipCode;
+	private Double memberDiscount;
 }
